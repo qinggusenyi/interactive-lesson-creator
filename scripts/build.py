@@ -32,12 +32,14 @@ def validate(lesson):
         if 'startYaw' in s: require(number(s['startYaw']) and -180<=s['startYaw']<=180,'startYaw out of range')
         if 'startPitch' in s: require(number(s['startPitch']) and -50<=s['startPitch']<=50,'startPitch out of range')
         require(isinstance(s.get('hotspots'),list) and s['hotspots'],'Each scene needs a teaching hotspot')
-        ids=set()
+        ids=set();arts=set()
         for h in s['hotspots']:
             require(re.fullmatch(r'[a-z][a-z0-9-]*',h.get('id','')) and h['id'] not in ids,'Hotspot id invalid or duplicated')
             ids.add(h['id'])
             for f in ('label','art','artAlt','quote','question','analysis'):
                 require(isinstance(h.get(f),str) and h[f].strip(),f'{h["id"]}: {f} required')
+            require(h['art']!=s['image'] and h['art'] not in arts,f'{h["id"]}: use a distinct detail image for this hotspot')
+            arts.add(h['art'])
             require('audio' not in h and 'audioSlow' not in h,'Audio playback is not supported by this template')
             fields=(('yaw',-180,180),('pitch',-85,85))
             for f,lo,hi in fields:require(number(h.get(f)) and lo<=h[f]<=hi,f'{h["id"]}: {f} out of range')
@@ -82,6 +84,7 @@ def build(config, output):
         s['image']=resource(s['image'],config.parent,'image')
         for h in s['hotspots']:
             h['art']=resource(h['art'],config.parent,'image')
+    validate(data)
     html=(ROOT/'assets/experience.html').read_text(encoding='utf-8')
     style=(ROOT/'assets/experience.css').read_text(encoding='utf-8')
     html=html.replace('/*__STYLE__*/',style)
