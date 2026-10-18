@@ -38,6 +38,11 @@ def validate(lesson):
                 require(isinstance(h.get(f),str) and h[f].strip(),f'{h["id"]}: {f} required')
             require(h['art']!=s['image'] and h['art'] not in arts,f'{h["id"]}: use a distinct detail image for this hotspot')
             arts.add(h['art'])
+            if 'reveal' in h:
+                r=h['reveal']
+                require(isinstance(r,dict) and all(isinstance(r.get(f),str) and r[f].strip() for f in ('button','art','artAlt','text')),f'{h["id"]}: reveal needs button, art, artAlt and text')
+                require(r['art']!=s['image'] and r['art'] not in arts,f'{h["id"]}: reveal needs its own after-action image')
+                arts.add(r['art'])
             require('audio' not in h and 'audioSlow' not in h,'Audio playback is not supported by this template')
             fields=(('yaw',-180,180),('pitch',-85,85))
             for f,lo,hi in fields:require(number(h.get(f)) and lo<=h[f]<=hi,f'{h["id"]}: {f} out of range')
@@ -76,6 +81,8 @@ def build(config, output):
         s['image']=resource(s['image'],config.parent,'image')
         for h in s['hotspots']:
             h['art']=resource(h['art'],config.parent,'image')
+            if 'reveal' in h:
+                h['reveal']['art']=resource(h['reveal']['art'],config.parent,'image')
     validate(data)
     html=(ROOT/'assets/experience.html').read_text(encoding='utf-8')
     style=(ROOT/'assets/experience.css').read_text(encoding='utf-8')

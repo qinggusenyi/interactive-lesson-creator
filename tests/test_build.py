@@ -28,8 +28,13 @@ with tempfile.TemporaryDirectory() as tmp:
     sample=copy.deepcopy(data);sample['scenes']=sample['scenes'][:1];sample['scenes'][0]['image']='ok.svg';sample['title']='摘句 </script><script>alert(1)</script>'
     for i,h in enumerate(sample['scenes'][0]['hotspots']):
         h['art']=f'art-{i}.svg';(p/h['art']).write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="#{i+1}ab"/></svg>',encoding='utf-8')
+    sample['scenes'][0]['hotspots'][0]['reveal']={'button':'翻开','art':'revealed.svg','artAlt':'翻开后的细节','text':'看见隐藏的细节'}
+    (p/'revealed.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4" fill="#cba"/></svg>',encoding='utf-8')
     (p/'lesson.json').write_text(json.dumps(sample,ensure_ascii=False),encoding='utf-8');build(p/'lesson.json',p/'index.html')
     result=verify(p/'index.html');assert result['static']=='PASS',result
+    assert result['embedded_images']==5,result
     assert (p/'index.html').read_text(encoding='utf-8').count('</script>')==2
+    (p/'revealed.svg').write_bytes((p/'art-0.svg').read_bytes());rejects(lambda:build(p/'lesson.json',p/'index.html'))
+    (p/'revealed.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4" fill="#cba"/></svg>',encoding='utf-8')
     (p/'art-1.svg').write_bytes((p/'art-0.svg').read_bytes());rejects(lambda:build(p/'lesson.json',p/'index.html'))
 print('PASS: self-contained build, JSON escaping, SVG/remote/path guards, duplicate ids/art and coordinate validation')

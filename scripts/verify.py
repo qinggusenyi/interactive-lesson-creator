@@ -35,7 +35,11 @@ def verify(path):
     data=json.loads(configs[0]);validate(data)
     images=0
     for s in data['scenes']:
-        for field,value in [('image',s['image'])]+[('art',h['art']) for h in s['hotspots']]:
+        images_in_scene=[('image',s['image'])]
+        for h in s['hotspots']:
+            images_in_scene.append(('art',h['art']))
+            if 'reveal' in h:images_in_scene.append(('reveal.art',h['reveal']['art']))
+        for field,value in images_in_scene:
             if not value.startswith('data:'):errors.append('Resource not embedded: '+field);continue
             head,encoded=value.split(',',1);raw=base64.b64decode(encoded,validate=True)
             images+=1
