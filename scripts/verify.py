@@ -33,18 +33,14 @@ def verify(path):
     configs=[s for a,s in scan.scripts if a.get('id')=='lesson-data']
     if len(configs)!=1:raise ValueError('Expected one lesson-data script')
     data=json.loads(configs[0]);validate(data)
-    images=audios=0
+    images=0
     for s in data['scenes']:
-        for field,value in [('image',s['image'])]+[(k,h[k]) for h in s['hotspots'] for k in ('audio','audioSlow') if k in h]:
+        for field,value in [('image',s['image'])]+[('art',h['art']) for h in s['hotspots']]:
             if not value.startswith('data:'):errors.append('Resource not embedded: '+field);continue
             head,encoded=value.split(',',1);raw=base64.b64decode(encoded,validate=True)
-            if field=='image':
-                images+=1
-                if 'svg+xml' in head:check_svg(raw)
-                elif not (raw.startswith(b'\x89PNG\r\n\x1a\n') or raw.startswith(b'\xff\xd8') or (raw.startswith(b'RIFF') and raw[8:12]==b'WEBP')):errors.append('Unknown image header')
-            else:
-                audios+=1
-                if not (raw.startswith((b'ID3',b'RIFF',b'OggS')) or (len(raw)>1 and raw[0]==255 and raw[1]&224==224)):errors.append('Unknown audio header')
+            images+=1
+            if 'svg+xml' in head:check_svg(raw)
+            elif not (raw.startswith(b'\x89PNG\r\n\x1a\n') or raw.startswith(b'\xff\xd8') or (raw.startswith(b'RIFF') and raw[8:12]==b'WEBP')):errors.append('Unknown image header')
     css=''.join(re.findall(r'<style>(.*?)</style>',text,re.S))
     if re.search(r'@import|url\(\s*["\']?(?!data:|#)',css,re.I):errors.append('CSS external dependency')
     runtime=[s for a,s in scan.scripts if a.get('type')!='application/json']
@@ -56,7 +52,7 @@ def verify(path):
             check=subprocess.run([node,'--check',str(script)],capture_output=True,text=True,encoding='utf-8')
             if check.returncode:errors.append('JavaScript syntax: '+check.stderr)
             syntax='PASS' if check.returncode==0 else 'FAIL'
-    return {'file':Path(path).name,'static':'PASS' if not errors else 'FAIL','javascript_syntax':syntax,'scenes':len(data['scenes']),'hotspots':sum(len(s['hotspots']) for s in data['scenes']),'embedded_images':images,'embedded_audio':audios,'errors':errors,'browser_interaction':'NOT TESTED by this script'}
+    return {'file':Path(path).name,'static':'PASS' if not errors else 'FAIL','javascript_syntax':syntax,'scenes':len(data['scenes']),'hotspots':sum(len(s['hotspots']) for s in data['scenes']),'embedded_images':images,'errors':errors,'browser_interaction':'NOT TESTED by this script'}
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('html',type=Path);args=parser.parse_args()

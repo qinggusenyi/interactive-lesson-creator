@@ -15,7 +15,7 @@ def rejects(fn):
     except (ValueError,OSError):return
     raise AssertionError('Expected rejection')
 
-data=json.loads((ROOT/'examples/spring/lesson.json').read_text(encoding='utf-8'))
+data=json.loads((ROOT/'examples/xiaoshitan/lesson.json').read_text(encoding='utf-8'))
 bad=copy.deepcopy(data);bad['scenes'].append(bad['scenes'][0]);rejects(lambda:validate(bad))
 bad=copy.deepcopy(data);bad['scenes'][0]['hotspots'][0]['yaw']=181;rejects(lambda:validate(bad))
 for svg in [b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',b'<svg onload="alert(1)"/>',b'<svg><image href="https://example.test/p.png"/></svg>']:
@@ -25,6 +25,7 @@ with tempfile.TemporaryDirectory() as tmp:
     rejects(lambda:resource('../outside.png',p,'image'))
     rejects(lambda:resource('https://example.test/p.png',p,'image'))
     sample=copy.deepcopy(data);sample['scenes']=sample['scenes'][:1];sample['scenes'][0]['image']='ok.svg';sample['title']='摘句 </script><script>alert(1)</script>'
+    for h in sample['scenes'][0]['hotspots']:h['art']='ok.svg'
     (p/'lesson.json').write_text(json.dumps(sample,ensure_ascii=False),encoding='utf-8');build(p/'lesson.json',p/'index.html')
     result=verify(p/'index.html');assert result['static']=='PASS',result
     assert (p/'index.html').read_text(encoding='utf-8').count('</script>')==2

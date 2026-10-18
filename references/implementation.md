@@ -1,61 +1,14 @@
-# 实施、数据与单文件打包
+# 数据结构与单文件打包
 
-## 运行与制作分离
+制作端需要 Python 3.9+；老师运行课件只需浏览器。见 `examples/xiaoshitan/lesson.json` 的完整实例。
 
-老师仅双击生成的 `index.html`，不需 Python/Node/npm。开发端使用 Python 3.9+ 标准库打包。模板无第三方库，系统字体不打包，SVG 是本仓库原创几何教学示意。
+顶层字段：`title`、`grade`、`goal`、`task`、`source.label`、`categories`、`scenes`。每个场景含 `id`、`title`、`mode:"panorama"`、`image`、`alt`、`note`、可选 `startYaw/startPitch` 和非空 `hotspots`。每个热点含 `id`、`label`、`yaw/pitch`、`art`、`artAlt`、`quote`、`question`、`analysis`、可选 `category` 和 `challenge`。`challenge` 包含 `prompt` 和不少于两个有 `label/correct/feedback` 的选项。`art` 是该热点的局部图，不可复用无关风景图。
+
+素材路径相对于 JSON 所在目录。构建器拒绝目录越界、远端 URL 与脚本式 SVG，内嵌图片、样式、脚本，并转义 JSON 中的 `<`。输出超过 40MB 时先优化素材。当前模板没有音频播放器；不要加入音频字段或承诺点读。
 
 ```sh
-python scripts/build.py examples/spring/lesson.json --out dist/spring/index.html
-python scripts/verify.py dist/spring/index.html
+python scripts/build.py examples/xiaoshitan/lesson.json --out dist/xiaoshitan/index.html
+python scripts/verify.py dist/xiaoshitan/index.html
 ```
 
-运行命令时以实际 Skill 根目录定位脚本，不能假定用户工作目录等于技能目录。可直接复制模板修改，但保留单文件离线验收要求。
-
-## lesson.json 最小结构
-
-```json
-{
-  "title":"一处景物，怎样写活",
-  "grade":"七年级 · 语文",
-  "goal":"用一条文本证据解释描写效果",
-  "task":"点击景物，比较词语，再把证据加入笔记。",
-  "source":{"label":"用户提供教材，需教师核对版本","url":""},
-  "categories":["视觉","听觉","触觉"],
-  "scenes":[{
-    "id":"garden","title":"春日草地","mode":"plane",
-    "image":"scene.svg","alt":"原创春日草地教学示意",
-    "note":"画面为教学示意，具体细节以教材为准。",
-    "hotspots":[{
-      "id":"grass","label":"草地","x":35,"y":70,
-      "quote":"此处填已核对的短句","question":"这个词让你看见什么？",
-      "analysis":"参考解读，允许有依据的其他解释。",
-      "category":"视觉",
-      "challenge":{"prompt":"比较原句与教学改写，你更能从哪句看见动作？",
-        "choices":[{"label":"保留动词的表达","correct":true,"feedback":"结合具体动词解释。"},
-                   {"label":"只写有小草","correct":false,"feedback":"信息还在，但动作感有什么变化？"}]}
-    }]
-  }]
-}
-```
-
-`x/y` 是 **plane 原始图像百分比**。模板把图片和热点放同一缩放层，图像采用 contain，不能用裁切后的坐标。单景可只有一个热点，但每个必须有教学作用。
-
-可选 `audio` / `audioSlow` 为热点相对路径（mp3/wav/ogg）；builder 内嵌，页面按钮播放并中断前一段。无需音频则省略字段，不产生在线依赖。
-
-主要使用 `mode:"panorama"`，image 是等距柱状图或明确标注质量边界的文学环视样片；热点改为 `yaw`（−180～180）、`pitch`（−85～85），场景可写 `startYaw`、`startPitch`（−50～50）。见 [panorama.md](panorama.md)。模板使用同一相机旋转的逆矩阵投影热点，并隐藏背面/画外点。图片 2:1 只能证明画幅，不能证明投影/无缝质量。`examples/` 两个教学案例均是实际环视；`tests/panorama/` 另有技术夹具，只验证渲染和定位，不是授课素材。
-
-## 打包约定
-
-- 图片/音频路径相对于 JSON 所在目录，只接受目录内文件，拒绝越界和远端素材。
-- CSS、JS 由模板内嵌；图片/音频转 data URI；JSON 的 `<` 转义，避免摘句中的 `</script>` 破坏页面。
-- SVG 禁止脚本、事件处理器、foreignObject、外部引用和样式外链；使用可信的静态素材。
-- 输出文件有稳定内容标记，超过 40MB 要说明体积来源、压缩/删去无用资源，不以在线链接换取小体积。
-- 原生 `<dialog>` 提供模态笔记板和焦点约束；拖动之外提供键盘/列表入口。
-
-## 可选点读制作
-
-仅有点读需求时使用 edge-tts，先查询当前音色，联网生成单词音频后试听校对，再写入 `audio` 字段。第三方在线服务不保证永久可用/免费；失败不得伪造 MP3 或偷偷改成在线实时播放。其代码许可证不等于所有语音输出的再分发授权，公开分发前单独核查服务条款。课件运行时不调用 edge-tts，也不把密钥放进 HTML。
-
-## 模板边界
-
-第一版提供场景、热点、可选选择比较题、分层解读、证据笔记、导览、音频、重置和全景降级。排序、连线、画布绘画等需按教学目的另外实现和测试；原项目拥有这些能力，不等于本模板自动拥有。无 AI 对话、学生账号、云存储、发音评分或成绩后台。刷新不保存学生笔记；可在笔记板复制学习记录。
+全景 `yaw` 范围为 −180° 至 180°，`pitch` 为 −85° 至 85°，需与场景中的物体位置校准。笔记保存在当前页面内存，可复制，刷新后清空。本模板提供静态阅读降级；没有云端成绩存储。

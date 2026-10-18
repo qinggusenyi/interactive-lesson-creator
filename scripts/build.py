@@ -28,7 +28,7 @@ def validate(lesson):
         scene_ids.add(s['id'])
         for field in ('title','image','alt','note'):
             require(isinstance(s.get(field),str) and s[field],f'{s["id"]}: {field} required')
-        require(s.get('mode') in ('plane','panorama'),'mode must be plane or panorama')
+        require(s.get('mode')=='panorama','This experience requires panorama scenes')
         if 'startYaw' in s: require(number(s['startYaw']) and -180<=s['startYaw']<=180,'startYaw out of range')
         if 'startPitch' in s: require(number(s['startPitch']) and -50<=s['startPitch']<=50,'startPitch out of range')
         require(isinstance(s.get('hotspots'),list) and s['hotspots'],'Each scene needs a teaching hotspot')
@@ -36,9 +36,10 @@ def validate(lesson):
         for h in s['hotspots']:
             require(re.fullmatch(r'[a-z][a-z0-9-]*',h.get('id','')) and h['id'] not in ids,'Hotspot id invalid or duplicated')
             ids.add(h['id'])
-            for f in ('label','quote','question','analysis'):
+            for f in ('label','art','artAlt','quote','question','analysis'):
                 require(isinstance(h.get(f),str) and h[f].strip(),f'{h["id"]}: {f} required')
-            fields=(('x',0,100),('y',0,100)) if s['mode']=='plane' else (('yaw',-180,180),('pitch',-85,85))
+            require('audio' not in h and 'audioSlow' not in h,'Audio playback is not supported by this template')
+            fields=(('yaw',-180,180),('pitch',-85,85))
             for f,lo,hi in fields:require(number(h.get(f)) and lo<=h[f]<=hi,f'{h["id"]}: {f} out of range')
             if 'challenge' in h:
                 c=h['challenge'];require(isinstance(c,dict) and isinstance(c.get('prompt'),str) and c['prompt'],'challenge.prompt required')
@@ -80,11 +81,11 @@ def build(config, output):
     for s in data['scenes']:
         s['image']=resource(s['image'],config.parent,'image')
         for h in s['hotspots']:
-            for field in ('audio','audioSlow'):
-                if field in h:h[field]=resource(h[field],config.parent,'audio')
-    html=(ROOT/'assets/lesson.html').read_text(encoding='utf-8')
-    html=html.replace('/*__STYLE__*/',(ROOT/'assets/lesson.css').read_text(encoding='utf-8'))
-    html=html.replace('/*__RUNTIME__*/',(ROOT/'assets/runtime.js').read_text(encoding='utf-8'))
+            h['art']=resource(h['art'],config.parent,'image')
+    html=(ROOT/'assets/experience.html').read_text(encoding='utf-8')
+    style=(ROOT/'assets/experience.css').read_text(encoding='utf-8')
+    html=html.replace('/*__STYLE__*/',style)
+    html=html.replace('/*__RUNTIME__*/',(ROOT/'assets/experience.js').read_text(encoding='utf-8'))
     html=html.replace('__LESSON_JSON__',json.dumps(data,ensure_ascii=False,separators=(',',':')).replace('<','\\u003c'))
     require(len(html.encode())<=40*1024*1024,'Single file exceeds 40MB; optimize source assets')
     output=Path(output);output.parent.mkdir(parents=True,exist_ok=True);output.write_text(html,encoding='utf-8')
