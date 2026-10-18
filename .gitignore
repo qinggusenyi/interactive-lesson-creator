@@ -1,0 +1,16 @@
+dist/
+artifacts/
+__pycache__/
+*.pyc
+node_modules/
+.venv/
+.env
+.env.*
+*.log
+*.zip
+*.skill
+.DS_Store
+Thumbs.db
+*.key
+*.pem
+*profile*/

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>互动课件</title>
+<style>/*__STYLE__*/</style>
+</head>
+<body>
+<header><a class="brand" href="#main">文<span>互动阅读实验室</span></a><div class="tools"><button id="teacher" aria-pressed="false">教师解读：关</button><button id="notebook">证据笔记 <span id="count">0</span></button><button id="reset">重新开始</button><button id="fullscreen">全屏</button></div></header>
+<section class="intro"><div><p class="eyebrow" id="grade"></p><h1 id="title"></h1></div><p id="goal"></p></section>
+<main id="main">
+<aside class="route"><p class="eyebrow">今天的任务</p><p class="task" id="task"></p><nav id="scenes" aria-label="选择场景"></nav><div class="route-end"><p id="progress" aria-live="polite"></p><button id="next">下一处观察 →</button></div></aside>
+<section class="explore" aria-labelledby="scene-title"><div class="scene-heading"><div><p class="eyebrow">看见 · 找证据 · 说理由</p><h2 id="scene-title"></h2></div><span id="mode-label"></span></div>
+<div id="stage" tabindex="0" role="group" aria-label="场景观察区，方向键移动视野"><div id="plane"><img id="scene-image" draggable="false" alt=""><div id="plane-points"></div></div><canvas id="panorama" hidden></canvas><div id="pano-points" hidden></div></div>
+<div class="scene-controls"><span id="view-hint"></span><div><button id="zoom-out" aria-label="缩小场景">−</button><button id="view-reset">复位</button><button id="zoom-in" aria-label="放大场景">＋</button></div></div><p class="scene-note" id="scene-note"></p><div id="hotspot-list" aria-label="文字观察点列表"></div><p class="status" id="status" role="status"></p></section>
+<aside class="detail" aria-label="观察与文本证据"><div id="empty"><p class="eyebrow">先看画面，再读文字</p><h2>从一个细节开始</h2><p>点击场景标记或下方文字入口，寻找可以支持你解释的文本证据。</p><div class="empty-mark" aria-hidden="true">“</div></div><article id="card" hidden><p class="eyebrow" id="spot-index"></p><h2 id="spot-title"></h2><p class="field-label">原文摘句</p><blockquote id="quote"></blockquote><p class="source" id="source"></p><p class="field-label">观察问题</p><p id="question"></p><section id="challenge" hidden><p id="challenge-prompt"></p><div id="choices"></div><p id="feedback" aria-live="polite"></p></section><button id="reveal">看看参考解读</button><p id="analysis" hidden></p><div id="audio-controls" hidden><button id="play-audio">听发音</button><button id="slow-audio" hidden>慢读</button></div><label for="category">我的证据归类</label><select id="category"></select><label for="note">我的解释</label><textarea id="note" rows="2" placeholder="这个细节让我想到……"></textarea><button class="primary" id="collect">加入证据笔记</button></article></aside>
+</main>
+<footer><span>离线互动课件 · 不上传学习记录</span><span>图像为教学示意；原文与教材版本请教师核对</span></footer>
+<dialog id="board"><div class="dialog-heading"><div><p class="eyebrow">带着证据，说出你的理解</p><h2>我的阅读笔记</h2></div><button id="close-board" aria-label="关闭证据笔记">×</button></div><p id="board-task"></p><div id="entries"></div><button id="copy-notes">复制学习记录</button><p id="copy-status" role="status"></p></dialog>
+<script type="application/json" id="lesson-data">__LESSON_JSON__</script>
+<script>/*__RUNTIME__*/</script>
+</body>
+</html>

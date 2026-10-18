@@ -1,0 +1,4 @@
+interface:
+  display_name: "语文环视互动课件"
+  short_description: "从教学目标出发制作可环视、可点击、可离线双击的语文互动课件"
+  default_prompt: "使用 $interactive-lesson-creator 将课文制作成带文本证据任务的单文件环视互动课件。"
