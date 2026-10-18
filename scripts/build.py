@@ -20,8 +20,6 @@ def validate(lesson):
         require(isinstance(lesson.get(field),str) and lesson[field].strip(),f'Missing text: {field}')
     require(isinstance(lesson.get('source'),dict) and isinstance(lesson['source'].get('label'),str),'source.label required')
     require(isinstance(lesson.get('scenes'),list) and lesson['scenes'],'At least one scene required')
-    categories=lesson.get('categories',[])
-    require(isinstance(categories,list) and all(isinstance(x,str) and x for x in categories),'categories must contain text')
     scene_ids=set()
     for s in lesson['scenes']:
         require(re.fullmatch(r'[a-z][a-z0-9-]*',s.get('id','')) and s['id'] not in scene_ids,'Scene id invalid or duplicated')
@@ -43,12 +41,6 @@ def validate(lesson):
             require('audio' not in h and 'audioSlow' not in h,'Audio playback is not supported by this template')
             fields=(('yaw',-180,180),('pitch',-85,85))
             for f,lo,hi in fields:require(number(h.get(f)) and lo<=h[f]<=hi,f'{h["id"]}: {f} out of range')
-            if 'challenge' in h:
-                c=h['challenge'];require(isinstance(c,dict) and isinstance(c.get('prompt'),str) and c['prompt'],'challenge.prompt required')
-                choices=c.get('choices');require(isinstance(choices,list) and len(choices)>=2,'Need two choices')
-                for choice in choices:
-                    require(isinstance(choice.get('label'),str) and choice['label'] and isinstance(choice.get('feedback'),str) and choice['feedback'] and isinstance(choice.get('correct'),bool),'Choice label, boolean correct, feedback required')
-                require(any(x['correct'] for x in choices),'At least one supported choice required')
     return lesson
 
 def number(x):
