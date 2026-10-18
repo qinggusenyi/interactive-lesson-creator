@@ -42,6 +42,7 @@ def verify(path):
             if 'svg+xml' in head:check_svg(raw)
             elif not (raw.startswith(b'\x89PNG\r\n\x1a\n') or raw.startswith(b'\xff\xd8') or (raw.startswith(b'RIFF') and raw[8:12]==b'WEBP')):errors.append('Unknown image header')
     css=''.join(re.findall(r'<style>(.*?)</style>',text,re.S))
+    if len(css)<1000 or not all(selector in css for selector in (':root{','.screen{','.detail{','.point{')):errors.append('Core stylesheet missing')
     if re.search(r'@import|url\(\s*["\']?(?!data:|#)',css,re.I):errors.append('CSS external dependency')
     runtime=[s for a,s in scan.scripts if a.get('type')!='application/json']
     if any(re.search(r'\b(?:fetch|XMLHttpRequest|WebSocket|EventSource|importScripts)\s*\(',s) for s in runtime):errors.append('Unexpected network API in runtime')
