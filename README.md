@@ -15,6 +15,8 @@
 
 把本仓库的 `SKILL.md`、`assets/`、`scripts/`、`references/` 一起放入 `~/.codex/skills/interactive-lesson-creator/`。重新开启会话后使用 `$interactive-lesson-creator`。其他兼容 Skill 的宿主可按其目录规则导入。
 
+豆包工作可按 [导入说明](docs/doubao-install.md) 导入技能文件夹或本项目打包的 ZIP。仓库样例通过本机构建和静态验证；豆包客户端的实际导入与新课文生成效果需在客户端再做一次验收。
+
 ## 构建新课件
 
 `examples/xiaoshitan/lesson.json` 只是字段范例；配图是本次独立制作的《小石潭记》文学情境图。新文章需要新内容和新素材。
